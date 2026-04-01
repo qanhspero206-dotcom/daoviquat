@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Đào Vị Quật</title>
+  <style>
+    body { font-family: Arial; margin:0; background:#fff0f5; }
+    header { background:#ff69b4; color:#fff; padding:20px; text-align:center; }
+    nav { display:flex; justify-content:center; gap:20px; background:#ffb6c1; padding:10px; }
+    nav a { color:#fff; font-weight:bold; cursor:pointer; }
+    .container { max-width:900px; margin:20px auto; padding:10px; }
+    .card { background:#fff; padding:15px; border-radius:12px; margin-bottom:15px; box-shadow:0 2px 6px rgba(0,0,0,0.1);} 
+    button { padding:8px 12px; margin-top:10px; background:#ff69b4; color:#fff; border:none; border-radius:6px; cursor:pointer; }
+    input, textarea, select { width:100%; padding:8px; margin:5px 0; }
+    a { color:#ff1493; text-decoration:none; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>🌸 Đào Vị Quật 🌸</h1>
+  <p>Thế giới truyện của riêng bạn</p>
+</header>
+
+<nav>
+  <a onclick="showSection('home')">Trang chủ</a>
+  <a onclick="showSection('ongoing')">Truyện đang tiến hành</a>
+  <a onclick="showSection('completed')">Truyện đã hoàn</a>
+</nav>
+
+<div class="container">
+
+  <div class="card">
+    <h2>➕ Thêm chương</h2>
+    <input id="title" placeholder="Tên chương">
+    <textarea id="content" rows="5" placeholder="Nội dung..."></textarea>
+    <select id="status">
+      <option value="ongoing">Đang tiến hành</option>
+      <option value="completed">Đã hoàn</option>
+    </select>
+    <button onclick="addChapter()">Đăng chương</button>
+  </div>
+
+  <div id="home" class="card">
+    <h2>📚 Mục lục</h2>
+    <ul id="toc"></ul>
+  </div>
+
+  <div id="ongoing" class="card" style="display:none;">
+    <h2>📖 Truyện đang tiến hành</h2>
+    <ul id="ongoingList"></ul>
+  </div>
+
+  <div id="completed" class="card" style="display:none;">
+    <h2>✅ Truyện đã hoàn</h2>
+    <ul id="completedList"></ul>
+  </div>
+
+  <div class="card" id="reader" style="display:none;">
+    <h2 id="readTitle"></h2>
+    <p id="readContent"></p>
+    <button onclick="prevChapter()">⬅️ Trước</button>
+    <button onclick="nextChapter()">➡️ Sau</button>
+    <button onclick="backToList()">📚 Về mục lục</button>
+  </div>
+
+</div>
+
+<script>
+let chapters = JSON.parse(localStorage.getItem('chapters')) || [];
+let currentIndex = 0;
+
+function save() {
+  localStorage.setItem('chapters', JSON.stringify(chapters));
+}
+
+function render() {
+  const toc = document.getElementById('toc');
+  const ongoing = document.getElementById('ongoingList');
+  const completed = document.getElementById('completedList');
+
+  toc.innerHTML = '';
+  ongoing.innerHTML = '';
+  completed.innerHTML = '';
+
+  chapters.forEach((chap, index) => {
+    const item = `<li><a href="#" onclick="readChapter(${index})">Chương ${index+1}: ${chap.title}</a></li>`;
+
+    toc.innerHTML += item;
+
+    if (chap.status === 'ongoing') {
+      ongoing.innerHTML += item;
+    } else {
+      completed.innerHTML += item;
+    }
+  });
+}
+
+function addChapter() {
+  const title = document.getElementById('title').value;
+  const content = document.getElementById('content').value;
+  const status = document.getElementById('status').value;
+
+  if (!title || !content) {
+    alert('Nhập đầy đủ nhé');
+    return;
+  }
+
+  chapters.push({ title, content, status });
+  save();
+  render();
+
+  document.getElementById('title').value = '';
+  document.getElementById('content').value = '';
+}
+
+function readChapter(index) {
+  currentIndex = index;
+  document.getElementById('reader').style.display = 'block';
+  document.getElementById('readTitle').innerText = `Chương ${index+1}: ` + chapters[index].title;
+  document.getElementById('readContent').innerText = chapters[index].content;
+}
+
+function nextChapter() {
+  if (currentIndex < chapters.length - 1) {
+    readChapter(currentIndex + 1);
+  }
+}
+
+function prevChapter() {
+  if (currentIndex > 0) {
+    readChapter(currentIndex - 1);
+  }
+}
+
+function backToList() {
+  document.getElementById('reader').style.display = 'none';
+}
+
+function showSection(section) {
+  document.getElementById('home').style.display = 'none';
+  document.getElementById('ongoing').style.display = 'none';
+  document.getElementById('completed').style.display = 'none';
+
+  document.getElementById(section).style.display = 'block';
+}
+
+render();
+</script>
+
+</body>
+</html>
